@@ -92,15 +92,20 @@ public class MeetingControllerServlet extends HttpServlet {
 
 	private void refreshMeetings(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		
 		int counter = 1;
+		int value = 0;
 		while (!request.getParameter("end").equals(counter + "")) {
-			meetingDbUtil.refreshMeetings(Integer.parseInt(request.getParameter("display" + counter)), counter - 1);
-			System.out.println(request.getParameter("display" + counter));
+			value = 0;
+//			System.out.println(request.getParameter("display" + counter));
+//			System.out.println(request.getParameter("display" + counter + "hidden"));
+			if (request.getParameter("display" + counter) != null) {
+				value = 1;
+			}
+			meetingDbUtil.refreshMeetings(value, Integer.parseInt(request.getParameter("display" + counter + "hidden")));
+			System.out.println("Value: " + value);
 			counter++;
 		}
-
-		
+		this.redirect(response);
 		
 	}
 

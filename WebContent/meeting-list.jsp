@@ -48,7 +48,6 @@
 
 						<tr>
 							<td>${counter}</td>
-							<c:set var="counter" value="${counter+1}" />
 							<td>${tempMeeting.getName()}</td>
 							<td>
 								${tempMeeting.getDate().substring(8)}.${tempMeeting.getDate().substring(5, 7)}.${tempMeeting.getDate().substring(0, 4)}
@@ -58,19 +57,22 @@
 								href="${deleteLink}"
 								onclick="if (!(confirm('Sind Sie sicher, dass Sie diese Veranstaltung löschen wollen?'))) return false">Löschen</a>
 							</td>
-							<td align="center"><c:if
-									test="${tempMeeting.isDisplay()}">
-									<input type="checkbox" name="display${counter-1}" value=1
-										checked />
+							<td align="center">
+								<c:if test="${tempMeeting.isDisplay()}">
+<!-- 									<input type="checkbox" name="display${counter-1}" value=1	-->
+									<input type="checkbox" name="display${counter}" value=1 checked />
 								</c:if> <c:if test="${not tempMeeting.isDisplay()}">
-									<input type="checkbox" name="display${counter-1}" value=0 />
-								</c:if></td>
+<!-- 									<input type="checkbox" name="display${counter-1}" value=0 />	-->
+									<input type="checkbox" name="display${counter}" value=0 />
+								</c:if>
+								<input type="hidden" name="display${counter}hidden" value="${tempMeeting.id}" />
+							</td>
+							<c:set var="counter" value="${counter+1}" />
 						</tr>
 					</c:forEach>
 					<input type="hidden" name="end" value="${counter}" />
 				</table>
-				<input type="submit" value="Änderungen speichern" name="Save"
-					class="save" />
+				<input type="submit" value="Änderungen speichern" name="Save" class="save" />
 			</form>
 		</div>
 	</div>
