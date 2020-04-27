@@ -18,12 +18,13 @@ import javax.sql.DataSource;
 @WebServlet("/MeetingControllerServlet")
 public class MeetingControllerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private static final String LIST = "LIST";
-	private static final String ADD = "ADD";
-	private static final String LOAD = "LOAD";
-	private static final String UPDATE = "UPDATE";
-	private static final String DELETE = "DELETE";
-	private static final String REFRESH = "REFRESH";
+	private static final String LISTMEETINGSADMIN = "LISTMEETINGSADMIN";
+	private static final String ADDMEETING = "ADDMEETING";
+	private static final String LOADMEETING = "LOADMEETING";
+	private static final String UPDATEMEETING = "UPDATEMEETING";
+	private static final String DELETEMEETING = "DELETEMEETING";
+	private static final String REFRESHMEETINGS = "REFRESHMEETINGS";
+	private static final String LISTMEETINGSUSER = "LISTMEETINGSUSER";
 
 	private MeetingDbUtil meetingDbUtil;
 	
@@ -53,40 +54,56 @@ public class MeetingControllerServlet extends HttpServlet {
 			
 			//if the command is missing, then default to listing meetings
 			if (command == null) {
-				command = LIST;
+				command = LISTMEETINGSUSER;
 			}
 			
 			// route to the appropriate method
 			switch (command) {
-			case LIST:
-				listMeetings(request, response);
-				break;
-			case ADD:
-				addMeeting(request, response);
-				break;
-			case LOAD:
-				loadMeeting(request, response);
-				break;
-			case UPDATE:
-				updateMeeting(request, response);
-				break;
-			case DELETE:
-				deleteMeeting(request, response);
-				break;
-			case REFRESH:
-				refreshMeetings(request, response);
-				break;
-
-			default:
-				listMeetings(request, response);
-				break;
+				case LISTMEETINGSADMIN:
+					listMeetingsAdmin(request, response);
+					break;
+				case ADDMEETING:
+					addMeeting(request, response);
+					break;
+				case LOADMEETING:
+					loadMeeting(request, response);
+					break;
+				case UPDATEMEETING:
+					updateMeeting(request, response);
+					break;
+				case DELETEMEETING:
+					deleteMeeting(request, response);
+					break;
+				case REFRESHMEETINGS:
+					refreshMeetings(request, response);
+					break;
+				case LISTMEETINGSUSER:
+					listMeetingsUser(request, response);
+					break;
+	
+				default:
+					listMeetingsUser(request, response);
+					break;
 			}
-			
 			
 			// list the meetings ... in MVC fashion
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}
+		
+	}
+
+	private void listMeetingsUser(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		
+		// get meeting from db util
+		List<Meeting> meetings = meetingDbUtil.getMeetings();
+		
+		//add meetings to the request
+		request.setAttribute("MEETING_LIST", meetings);
+		
+		// send to JSP page (view)
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/meeting-list-user.jsp");
+		dispatcher.forward(request, response);
 		
 	}
 
@@ -96,13 +113,10 @@ public class MeetingControllerServlet extends HttpServlet {
 		int value = 0;
 		while (!request.getParameter("end").equals(counter + "")) {
 			value = 0;
-//			System.out.println(request.getParameter("display" + counter));
-//			System.out.println(request.getParameter("display" + counter + "hidden"));
 			if (request.getParameter("display" + counter) != null) {
 				value = 1;
 			}
 			meetingDbUtil.refreshMeetings(value, Integer.parseInt(request.getParameter("display" + counter + "hidden")));
-			System.out.println("Value: " + value);
 			counter++;
 		}
 		this.redirect(response);
@@ -180,7 +194,7 @@ public class MeetingControllerServlet extends HttpServlet {
 		this.redirect(response);
 	}
 
-	private void listMeetings(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	private void listMeetingsAdmin(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
 		// get meeting from db util
 		List<Meeting> meetings = meetingDbUtil.getMeetings();

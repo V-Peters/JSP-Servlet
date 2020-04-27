@@ -21,7 +21,7 @@
 		<h3>Veranstaltung hinzufügen</h3>
 
 		<form action="MeetingControllerServlet" method=GET>
-			<input type="hidden" name="command" value="ADD" />
+			<input type="hidden" name="command" value="ADDMEETING" />
 
 			<table>
 				<tbody>
@@ -34,8 +34,7 @@
 										<td>Übrige Zeichen:</td>
 									</tr>
 									<tr>
-										<td><input type="text" required
-											placeholder="Veranstaltungsname" name="name" maxlength="100" /></td>
+										<td><input type="text" required placeholder="Veranstaltungsname" name="name" maxlength="100" /></td>
 									</tr>
 								</tbody>
 							</table>

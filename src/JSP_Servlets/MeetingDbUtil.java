@@ -103,6 +103,9 @@ public class MeetingDbUtil {
 				Statement.setInt(3, 0);
 			}
 			
+			System.out.println(meeting.getDate());
+			System.out.println(Statement);
+			
 			// execute sql insert
 			Statement.execute();
 			
@@ -162,7 +165,6 @@ public class MeetingDbUtil {
 	}
 
 	public void updateMeeting(Meeting meeting) throws Exception{
-
 		Connection Connectoion = null;
 		PreparedStatement Statement = null;
 		
@@ -226,80 +228,54 @@ public class MeetingDbUtil {
 	}
 
 	public void refreshMeetings(int value, int id) throws Exception{
-// TODO
-		System.out.println("Value: " + value);
-		System.out.println("Id: " + id);
-//		Connection Connection = null;
-//		PreparedStatement Statement = null;
-//		
-//			try {
-//			
-//			// get db connection
-//			Connection = dataSource.getConnection();
-//			
-//			// create SQL update statement
-//			String sql = "UPDATE jsp_test.meetings SET display = ? WHERE id = ?";
-//			
-//			// prepare statement
-//			Statement = Connection.prepareStatement(sql);
-//			
-//			// set params
-//			Statement.setInt(1, value);
-//			Statement.setInt(2, id);
-//			
-//			// execute SQL statement
-//			Statement.execute();
-//		} finally {
-//			// clean up JDBC objects
-//			close(Connection, Statement, null);
-//		}
-			Connection Connection = null;
-			PreparedStatement Statement = null;
-			ResultSet ResultSet = null;
+		
+		Connection Connection = null;
+		PreparedStatement Statement = null;
+		ResultSet ResultSet = null;
+		
+		try {
 			
-			try {
+			// get connection to database
+			Connection = dataSource.getConnection();
+			
+			// create SQL statement to get the value of display from the selected meeting
+			String sql1 = "SELECT display FROM jsp_test.meetings WHERE id = ?;";
+			
+			// create prepared statement
+			Statement = Connection.prepareStatement(sql1);
+			
+			// set params
+			Statement.setInt(1, id);
+			
+			// execute statement
+			ResultSet = Statement.executeQuery();
+			
+			// retrieve data from result set row
+			if(ResultSet.next()) {
+			int display = ResultSet.getInt("display");
+			
+			if (display != value) {
+				// create SQL update statement
+				String sql2 = "UPDATE jsp_test.meetings SET display = ?, last_updated = now() WHERE id = ?";
 				
-				// get connection to database
-				Connection = dataSource.getConnection();
-				
-				// create SQL statement to get the value of display from the selected meeting
-				String sql1 = "SELECT display FROM jsp_test.meetings WHERE id = ?;";
-				
-				// create prepared statement
-				Statement = Connection.prepareStatement(sql1);
+				// prepare statement
+				Statement = Connection.prepareStatement(sql2);
 				
 				// set params
-				Statement.setInt(1, id);
+				Statement.setInt(1, value);
+				Statement.setInt(2, id);
 				
-				// execute statement
-				ResultSet = Statement.executeQuery();
-				
-				// retrieve data from result set row
-				if(ResultSet.next()) {
-				int display = ResultSet.getInt("display");
-				
-				if (display != value) {
-					// create SQL update statement
-					String sql2 = "UPDATE jsp_test.meetings SET display = ?, last_updated = now() WHERE id = ?";
-					
-					// prepare statement
-					Statement = Connection.prepareStatement(sql2);
-					
-					// set params
-					Statement.setInt(1, value);
-					Statement.setInt(2, id);
-					
-					// execute SQL statement
-					Statement.execute();
-				}
-				
-				} else {
-					throw new Exception("Could not find meetings id: " + id);
-				}
-			} finally {
-				// clean up JDBC object
-				close(Connection, Statement, ResultSet);
+				// execute SQL statement
+				Statement.execute();
 			}
+			
+			} else {
+				throw new Exception("Could not find meetings id: " + id);
+			}
+		} finally {
+			// clean up JDBC object
+			close(Connection, Statement, ResultSet);
+		}
 		
 	}
 

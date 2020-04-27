@@ -15,12 +15,14 @@
 			<h2>Veranstaltungen</h2>
 		</div>
 	</div>
+	
 
 	<div id="container">
 		<div id="content">
 			<form action="MeetingControllerServlet" method=GET>
-				<input type="hidden" name="command" value="REFRESH" />
+				<input type="hidden" name="command" value="REFRESHMEETINGS" />
 				<input type="button" value="Veranstaltung hinzufügen" onclick="window.location.href='meeting-add.jsp'; return false;" />
+				<a href="admin-login.html">Logout</a>
 
 				<table border="1">
 					<tr>
@@ -36,13 +38,13 @@
 
 						<!-- create an own link for each meeting -->
 						<c:url var="tempLink" value="MeetingControllerServlet">
-							<c:param name="command" value="LOAD" />
+							<c:param name="command" value="LOADMEETING" />
 							<c:param name="meetingId" value="${tempMeeting.id}" />
 						</c:url>
 
 						<!-- create an own link for each meeting -->
 						<c:url var="deleteLink" value="MeetingControllerServlet">
-							<c:param name="command" value="DELETE" />
+							<c:param name="command" value="DELETEMEETING" />
 							<c:param name="meetingId" value="${tempMeeting.id}" />
 						</c:url>
 

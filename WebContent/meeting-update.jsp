@@ -23,7 +23,7 @@
 
 		<form action="MeetingControllerServlet" method=GET>
 
-			<input type="hidden" name="command" value="UPDATE" /> <input
+			<input type="hidden" name="command" value="UPDATEMEETING" /> <input
 				type="hidden" name="meetingId" value="${MEETING.id}" />
 
 			<table>
