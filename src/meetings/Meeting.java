@@ -1,4 +1,4 @@
-package JSP_Servlets;
+package meetings;
 
 public class Meeting {
 	

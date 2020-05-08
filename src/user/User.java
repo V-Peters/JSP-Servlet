@@ -1,4 +1,4 @@
-package JSP_Servlets;
+package user;
 
 public class User {
 	

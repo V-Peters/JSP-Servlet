@@ -8,7 +8,7 @@
 <body>
 	
 	<c:if test="${param.password == param.passwordCheck}">
-		<form action="UserControllerServlet" method=GET>
+		<form action="../UserControllerServlet" method=GET>
 			<input type="hidden" name="command" value="ADDUSER" />
 			Der Benutzer hat sich mit folgenden Daten registriert:
 			<table>
@@ -58,7 +58,9 @@
 	
 	
 	<c:if test="${param.password != param.passwordCheck}">
-		Die Passwörter stimmen nicht überein
+		<h1>Die Passwörter stimmen nicht überein!</h1>
+		Automatische Weiterleitung eingeleitet.
+		<meta http-equiv="refresh" content="2; URL=user-registration.html">
 	</c:if>
 
 </body>

@@ -1,21 +1,22 @@
 <html>
 
 <head>
-<title>Admin Login</title>
+<title>User Login</title>
 </head>
 
 <body>
 
-	<form action="process-admin-login.jsp">
+	<form action="process-user-login.jsp">
 
-		<h2>Admin Login</h2>
-
-		<hr>
-
-		<a href="index.html">Home</a> | <a href="user-login.jsp">Zum User Login</a>
+		<h2>User Login</h2>
 
 		<hr>
 
+		<a href="../index.html">Home</a> | <a href="../AdminLogin/admin-login.html">Zum Admin Login</a>
+
+		<hr>
+		<a href="../UserRegistration/user-registration.html">Zur Registrierung</a>
+		
 		<table>
 			<tbody>
 				<tr>
@@ -28,7 +29,7 @@
 				</tr>
 			</tbody>
 		</table>
-		<br> <input type="submit" value="Login" />
+		<br> <input type="submit" value="Anmelden" />
 
 	</form>
 

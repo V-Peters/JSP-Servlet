@@ -7,10 +7,15 @@
 
 <body>
 
-	<!-- Der Admin hat folgende Anmeldedaten: Benutzrname: admin, Passwort: admin	-->
+	<!-- Der Admin hat folgende Anmeldedaten: Benutzername: admin, Passwort: admin	-->
 
 	<c:if test="${param.username == 'admin' and param.password == 'admin'}">
-		<meta http-equiv="refresh" content="0; URL=MeetingControllerServlet">
+		<form name="adminLogin" action="../MeetingAdminControllerServlet" method=GET>
+			<input type="hidden" name="command" value="LISTMEETINGSADMIN" />
+		</form>
+		<script>
+		    document.adminLogin.submit();
+		</script>
 	</c:if>
 
 	<c:if test="${param.username != 'admin' or param.password != 'admin'}">

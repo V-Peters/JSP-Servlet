@@ -1,4 +1,4 @@
-package JSP_Servlets;
+package meetings;
 
 import java.io.IOException;
 import java.util.List;
@@ -15,8 +15,8 @@ import javax.sql.DataSource;
 /**
  * Servlet implementation class MeetingControllerServlet
  */
-@WebServlet("/MeetingControllerServlet")
-public class MeetingControllerServlet extends HttpServlet {
+@WebServlet("/MeetingAdminControllerServlet")
+public class MeetingAdminControllerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final String LISTMEETINGSADMIN = "LISTMEETINGSADMIN";
 	private static final String ADDMEETING = "ADDMEETING";
@@ -24,7 +24,6 @@ public class MeetingControllerServlet extends HttpServlet {
 	private static final String UPDATEMEETING = "UPDATEMEETING";
 	private static final String DELETEMEETING = "DELETEMEETING";
 	private static final String REFRESHMEETINGS = "REFRESHMEETINGS";
-	private static final String LISTMEETINGSUSER = "LISTMEETINGSUSER";
 
 	private MeetingDbUtil meetingDbUtil;
 	
@@ -36,7 +35,6 @@ public class MeetingControllerServlet extends HttpServlet {
 	public void init() throws ServletException {
 		super.init();
 		
-		//create our meeting db util ... and pass in the conn pool / database
 		try {
 			meetingDbUtil = new MeetingDbUtil(dataSource);
 		} catch (Exception e) {
@@ -49,15 +47,13 @@ public class MeetingControllerServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		try {
-			// read the "command" parameter
 			String command = request.getParameter("command");
 			
-			//if the command is missing, then default to listing meetings
 			if (command == null) {
-				command = LISTMEETINGSUSER;
+				command = LISTMEETINGSADMIN;
 			}
 			
-			// route to the appropriate method
+			
 			switch (command) {
 				case LISTMEETINGSADMIN:
 					listMeetingsAdmin(request, response);
@@ -77,33 +73,15 @@ public class MeetingControllerServlet extends HttpServlet {
 				case REFRESHMEETINGS:
 					refreshMeetings(request, response);
 					break;
-				case LISTMEETINGSUSER:
-					listMeetingsUser(request, response);
-					break;
 	
 				default:
-					listMeetingsUser(request, response);
+					listMeetingsAdmin(request, response);
 					break;
 			}
 			
-			// list the meetings ... in MVC fashion
 		} catch (Exception e) {
 			throw new ServletException(e);
 		}
-		
-	}
-
-	private void listMeetingsUser(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
-		// get meeting from db util
-		List<Meeting> meetings = meetingDbUtil.getMeetings();
-		
-		//add meetings to the request
-		request.setAttribute("MEETING_LIST", meetings);
-		
-		// send to JSP page (view)
-		RequestDispatcher dispatcher = request.getRequestDispatcher("/meeting-list-user.jsp");
-		dispatcher.forward(request, response);
 		
 	}
 
@@ -125,19 +103,15 @@ public class MeetingControllerServlet extends HttpServlet {
 
 	private void deleteMeeting(HttpServletRequest request, HttpServletResponse response) throws Exception{
 		
-		// read meeting id from form data
 		String meeting = request.getParameter("meetingId");
 		
-		// delete meeting from database
 		meetingDbUtil.deleteMeeting(meeting);
 		
-		// send meeting back to "list meetings" page
 		this.redirect(response);		
 	}
 
 	private void updateMeeting(HttpServletRequest request, HttpServletResponse response) throws Exception{
 		
-		// read meeting info from form data
 		int id = Integer.parseInt(request.getParameter("meetingId"));
 		String name = request.getParameter("name");
 		String date = request.getParameter("year") + "-" + request.getParameter("month") + "-" + request.getParameter("day");
@@ -147,35 +121,27 @@ public class MeetingControllerServlet extends HttpServlet {
 			display = true;
 		}
 		
-		// create new meeting object
 		Meeting meeting = new Meeting(id, name, date, time, display);
 		
-		// perform update on database
 		meetingDbUtil.updateMeeting(meeting);
 		
-		// send them back to the "list meetings" page
 		this.redirect(response);		
 	}
 
 	private void loadMeeting(HttpServletRequest request, HttpServletResponse response) throws Exception{
 
-		// read meeting id from data
 		String meetingId = request.getParameter("meetingId");
 		
-		// get meeting from database
 		Meeting meeting = meetingDbUtil.getMeeting(meetingId);
 		
-		// place meeting in the request attribute
 		request.setAttribute("MEETING", meeting);
 		
-		// send to jsp page: meeting-update.jsp
-		RequestDispatcher dispatcher = request.getRequestDispatcher("/meeting-update.jsp");
+		RequestDispatcher dispatcher = request.getRequestDispatcher("Meetings/meeting-update.jsp");
 		dispatcher.forward(request, response);
 	}
 
 	private void addMeeting(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-		// read meeting info from form data
 		String name = request.getParameter("name");
 		String date = request.getParameter("year") + "-" + request.getParameter("month") + "-" + request.getParameter("day");
 		String time = request.getParameter("hour") + ":" + request.getParameter("minute") + ":00";
@@ -184,32 +150,26 @@ public class MeetingControllerServlet extends HttpServlet {
 			display = true;
 		}
 		
-		//create a new meeting object
 		Meeting meeting = new Meeting(name, date, time, display);
 		
-		// add the meeting to the database
 		meetingDbUtil.addMeeting(meeting);
 		
-		// send back to main page (the meeting list)
 		this.redirect(response);
 	}
 
 	private void listMeetingsAdmin(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		// get meeting from db util
 		List<Meeting> meetings = meetingDbUtil.getMeetings();
 		
-		//add meetings to the request
 		request.setAttribute("MEETING_LIST", meetings);
 		
-		// send to JSP page (view)
-		RequestDispatcher dispatcher = request.getRequestDispatcher("/meeting-list.jsp");
+		RequestDispatcher dispatcher = request.getRequestDispatcher("Meetings/meeting-list.jsp");
 		dispatcher.forward(request, response);
 		
 	}
 	
 	private void redirect(HttpServletResponse response) throws Exception{
-		response.sendRedirect("/JSP_Servlets/MeetingControllerServlet");
+		response.sendRedirect("MeetingAdminControllerServlet");
 	}
 
 }

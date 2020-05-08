@@ -19,10 +19,10 @@
 
 	<div id="container">
 		<div id="content">
-			<form action="MeetingControllerServlet" method=GET>
+			<form action="MeetingAdminControllerServlet" method=GET>
 				<input type="hidden" name="command" value="REFRESHMEETINGS" />
-				<input type="button" value="Veranstaltung hinzufügen" onclick="window.location.href='meeting-add.jsp'; return false;" />
-				<a href="admin-login.html">Logout</a>
+				<input type="button" value="Veranstaltung hinzufügen" onclick="window.location.href='Meetings/meeting-add.jsp'; return false;" />
+				<a href="AdminLogin/admin-login.html">Logout</a>
 
 				<table border="1">
 					<tr>
@@ -37,13 +37,13 @@
 					<c:forEach var="tempMeeting" items="${MEETING_LIST}">
 
 						<!-- create an own link for each meeting -->
-						<c:url var="tempLink" value="MeetingControllerServlet">
+						<c:url var="tempLink" value="MeetingAdminControllerServlet">
 							<c:param name="command" value="LOADMEETING" />
 							<c:param name="meetingId" value="${tempMeeting.id}" />
 						</c:url>
 
 						<!-- create an own link for each meeting -->
-						<c:url var="deleteLink" value="MeetingControllerServlet">
+						<c:url var="deleteLink" value="MeetingAdminControllerServlet">
 							<c:param name="command" value="DELETEMEETING" />
 							<c:param name="meetingId" value="${tempMeeting.id}" />
 						</c:url>
@@ -55,9 +55,10 @@
 								${tempMeeting.getDate().substring(8)}.${tempMeeting.getDate().substring(5, 7)}.${tempMeeting.getDate().substring(0, 4)}
 							</td>
 							<td>${tempMeeting.getTime().substring(0, 5)} Uhr</td>
-							<td><a href="${tempLink}">Bearbeiten</a> | <a
-								href="${deleteLink}"
-								onclick="if (!(confirm('Sind Sie sicher, dass Sie diese Veranstaltung löschen wollen?'))) return false">Löschen</a>
+							<td>
+								<a href="${tempLink}">Bearbeiten</a>
+								 | 
+								<a href="${deleteLink}" onclick="if (!(confirm('Sind Sie sicher, dass Sie diese Veranstaltung löschen wollen?'))) return false">Löschen</a>
 							</td>
 							<td align="center">
 								<c:if test="${tempMeeting.isDisplay()}">

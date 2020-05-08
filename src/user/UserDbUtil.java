@@ -1,4 +1,4 @@
-package JSP_Servlets;
+package user;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,7 +8,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+import javax.xml.ws.Response;
 
 public class UserDbUtil {
 	
@@ -26,20 +29,15 @@ public class UserDbUtil {
 		ResultSet ResultSet = null;
 		
 		try {
-		// get a connection
 			Connection = dataSource.getConnection();
 		
-		// create a SQL statement
 			String sql = "SELECT * FROM jsp_test.user;";
 			
 			Statement = Connection.createStatement();
 		
-		// execute query
 			ResultSet = Statement.executeQuery(sql);
 		
-		// process result set
 			while (ResultSet.next()) {
-				// retrieve data from result set row
 				int id = ResultSet.getInt("id");
 				String username = ResultSet.getString("username");
 				String password = ResultSet.getString("password");
@@ -48,17 +46,14 @@ public class UserDbUtil {
 				String email= ResultSet.getString("email");
 				String company = ResultSet.getString("company");
 				
-				// create new meetings object
 				User tempUser = new User(id, username, password, vorname, lastname, email, company);
 				
-				// add it to the list of users
 				user.add(tempUser);
 			}
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			// close JDBC objects
 			close(Connection, Statement, ResultSet);
 		}
 		return user;
@@ -88,25 +83,19 @@ public class UserDbUtil {
 		ResultSet ResultSet = null;
 		
 		try {
-			// get db connection
 			Connection = dataSource.getConnection();
 
-			// create sql for insert
 			String sqlSelect = "SELECT `username` FROM `jsp_test`.`user` WHERE username = ?;";
 			Statement = Connection.prepareStatement(sqlSelect);
 			
-			// set the param values for the user
 			Statement.setString(1, user.getUsername());
 
-			// execute sql insert
 			ResultSet = Statement.executeQuery();
 			
 			if (!ResultSet.next()) {
-				// create sql for insert
 				String sqlInsert = "INSERT INTO `jsp_test`.`user` (`username`, `password`, `vorname`, `lastname`, `email`, `company`) VALUES (?, ?, ?, ?, ?, ?);";
 				Statement = Connection.prepareStatement(sqlInsert);
 				
-				// set the param values for the user
 				Statement.setString(1, user.getUsername());
 				Statement.setString(2, user.getPassword());
 				Statement.setString(3, user.getVorname());
@@ -121,44 +110,78 @@ public class UserDbUtil {
 			
 		}
 		finally {
-			// clean up JDBC object
 			close(Connection, Statement, null);
 		}
 		
 	}
 
-	public int loginUser(User user) throws Exception{
+	public boolean loginUser(HttpServletResponse response, User user) throws Exception{
 		
 		Connection Connection = null;
 		PreparedStatement Statement = null;
 		ResultSet ResultSet = null;
-		int userId = 0;
 		
 		try {
-			// get db connection
 			Connection = dataSource.getConnection();
 
-			// create sql for insert
-			String sqlSelect = "SELECT `username` FROM `jsp_test`.`user` WHERE username = ?;";
+			String sqlSelect = "SELECT `password` FROM `jsp_test`.`user` WHERE username = \"" + user.getUsername() + "\";";
+//			System.out.println(sqlSelect);
 			Statement = Connection.prepareStatement(sqlSelect);
 			
-			// set the param values for the user
-			Statement.setString(1, user.getUsername());
+//			Statement.setString(1, user.getUsername());
 
-			// execute sql insert
 			ResultSet = Statement.executeQuery();
 			
 			if (ResultSet.next()) {
-				if (ResultSet.getString("username") == user.getUsername() && ResultSet.getString("password") == user.getPassword()) {
-					userId = ResultSet.getInt("id");
+//				System.out.println(ResultSet.getString("password"));
+//				System.out.println(user.getPassword());
+//				System.out.println(ResultSet.getString("password"));
+//				System.out.println(user.getPassword());
+				if (ResultSet.getString("password").equals(user.getPassword())) {
+					this.createCookie(response, user);
+					return true;
 				}
+			} else {
+				throw new Exception("Es gibt keinen Benutzer mit diesem Namen: " + user.getUsername());
+			}
+			return false;
+		}
+		finally {
+			close(Connection, Statement, null);
+		}
+	}
+
+	private void createCookie(HttpServletResponse response, User user) throws Exception {
+		Cookie userCookie = new Cookie("JSP.userId", this.getUserId(user));
+		userCookie.setMaxAge(60*30);
+		response.addCookie(userCookie);
+	}
+
+	public String getUserId(User user) throws Exception{
+		
+		Connection Connection = null;
+		PreparedStatement Statement = null;
+		ResultSet ResultSet = null;
+		String userId;
+		
+		try {
+			Connection = dataSource.getConnection();
+
+			String sqlSelect = "SELECT `id` FROM `jsp_test`.`user` WHERE `username` = ?;";
+			Statement = Connection.prepareStatement(sqlSelect);
+
+			Statement.setString(1, user.getUsername());
+
+			ResultSet = Statement.executeQuery();
+			
+			if (ResultSet.next()) {
+				userId = ResultSet.getString("id");
 			} else {
 				throw new Exception("Es gibt keinen Benutzer mit diesem Namen: " + user.getUsername());
 			}
 			return userId;
 		}
 		finally {
-			// clean up JDBC object
 			close(Connection, Statement, null);
 		}
 	}
