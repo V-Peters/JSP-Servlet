@@ -22,4 +22,8 @@ INSERT INTO `jsp_test`.`user` (
     `email`,
     `company`) 
 VALUES
-	('vpet', '12345', 'Victor', 'Peters', 'V.Peters@iks-gmbh.com', 'IKS');
+	('vpet', '12345', 'Victor', 'Peters', 'V.Peters@iks-gmbh.com', 'IKS'),
+	('mmus', '12345', 'Max', 'Mustermann', 'M.Mustermann@beispielfirma.com', 'Beispielfirma'),
+	('gdin', '12345', 'Gerda', 'Dinkel', 'G.Dinkel@email.com', 'Post'),
+	('sfle', '12345', 'Sammy', 'Fleischbällschen', 'S.Fleisch@hotmail.com', 'Burgerking'),
+	('smue', '12345', 'Sabine', 'Müller', 'S.Müller@gmail.com', 'DHL');
