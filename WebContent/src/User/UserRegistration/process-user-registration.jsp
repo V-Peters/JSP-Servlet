@@ -8,7 +8,7 @@
 <body>
 	
 	<c:if test="${param.password == param.passwordCheck}">
-		<form action="../UserControllerServlet" method=GET>
+		<form action="../../../UserControllerServlet" method=GET>
 			<input type="hidden" name="command" value="ADDUSER" />
 			Der Benutzer hat sich mit folgenden Daten registriert:
 			<table>
@@ -29,8 +29,8 @@
 					</tr>
 					<tr>
 						<td> Vorname:</td>
-						<td>${param.vorname}</td>
-						<input type="hidden" name="vorname" value="${param.vorname}" />
+						<td>${param.firstname}</td>
+						<input type="hidden" name="firstname" value="${param.firstname}" />
 					</tr>
 					<tr>
 						<td> Nachname:</td>

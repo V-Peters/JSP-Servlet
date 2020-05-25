@@ -3,7 +3,7 @@
 <html>
 
 <head>
-<title>Veranstaltung hinzufügen</title>
+<title>Veranstaltung bearbeiten</title>
 <!-- 
 	<link type="text/css" rel="stylesheet" href="css/style.css">
 	<link type="text/css" rel="stylesheet" href="css/add-student-style.css">
@@ -19,30 +19,23 @@
 	</div>
 
 	<div id="container">
-		<h3>Veranstaltung hinzufügen</h3>
+		<h3>Veranstaltung bearbeiten</h3>
 
-		<form action="../MeetingAdminControllerServlet" method=GET>
-			<input type="hidden" name="command" value="ADDMEETING" />
+		<form action="MeetingControllerServlet" method=GET>
+
+			<input type="hidden" name="command" value="UPDATEMEETING" /> <input
+				type="hidden" name="meetingId" value="${MEETING.id}" />
 
 			<table>
 				<tbody>
 					<tr>
 						<td><label>Name:</label></td>
-						<td>
-							<table>
-								<tbody>
-									<tr>
-										<td>Übrige Zeichen:</td>
-									</tr>
-									<tr>
-										<td><input type="text" required placeholder="Veranstaltungsname" name="name" maxlength="100" /></td>
-									</tr>
-								</tbody>
-							</table>
-						</td>
+						<td><input type="text" name="name"
+							value="${MEETING.name}" required maxlength="100" /></td>
 					</tr>
 					<tr>
-						<td>Datum:</td>
+						<!-- TODO auswahlmöglichkeit -->
+						<td><label>Datum:</label></td>
 						<td>
 							<table>
 								<tbody>
@@ -53,12 +46,15 @@
 									</tr>
 									<tr>
 										<td><select name="day">
+												<option>${MEETING.date.substring(8, 10)}</option>
 												<% for (int i = 1; i <= 31; i++) out.print("<option>" + i + "</option>"); %>
 										</select></td>
 										<td><select name="month">
+												<option>${MEETING.date.substring(5, 7)}</option>
 												<% for (int i = 1; i <= 12; i++) out.print("<option>" + i + "</option>"); %>
 										</select></td>
 										<td><select name="year">
+												<option>${MEETING.date.substring(0, 4)}</option>
 												<% for (int i = 2020; i <= 2100; i++) out.print("<option>" + i + "</option>"); %>
 										</select></td>
 									</tr>
@@ -78,9 +74,11 @@
 									</tr>
 									<tr>
 										<td><select name="hour">
+												<option>${MEETING.time.substring(0, 2)}</option>
 												<% for (int i = 0; i <= 23; i++) out.print("<option>" + i + "</option>"); %>
 										</select></td>
 										<td><select name="minute">
+												<option>${MEETING.time.substring(3, 5)}</option>
 												<% for (int i = 0; i <= 55; i+= 5) out.print("<option>" + i + "</option>"); %>
 										</select></td>
 									</tr>
@@ -90,12 +88,16 @@
 					</tr>
 					<tr>
 						<td>Anzeigen:</td>
-						<td><input type="checkbox" name="display" value="true"
-							checked /></td>
+						<td><c:if test="${MEETING.isDisplay()}">
+								<input type="checkbox" name="display" value="display" checked />
+							</c:if> <c:if test="${not MEETING.isDisplay()}">
+								<input type="checkbox" name="display" value="display" />
+							</c:if></td>
 					</tr>
 					<tr>
 						<td><label></label></td>
-						<td><input type="submit" value="Veranstaltung hinzufügen" name="Save" class="save" /></td>
+						<td><input type="submit" value="Anderungen speichern"
+							name="Save" class="save" /></td>
 					</tr>
 				</tbody>
 			</table>
@@ -105,7 +107,7 @@
 		<div style="" :both;"></div>
 
 		<p>
-			<a href="../MeetingAdminControllerServlet">Zurück zur Veranstaltungsliste</a>
+			<a href="MeetingControllerServlet">Zurück zur Veranstaltungsliste</a>
 		</p>
 
 	</div>

@@ -5,34 +5,47 @@ public class User {
 	private int id;
 	private String username;
 	private String password;
-	private String vorname;
+	private String firstname;
 	private String lastname;
 	private String email;
 	private String company;
+	private String isAdmin;
 	
 	
-	public User(int id, String username, String password, String vorname, String lastname, String email, String company) {
+	public User(int id, String username, String password, String firstname, String lastname, String email, String company) {
 		this.id = id;
 		this.username = username;
 		this.password = password;
-		this.vorname = vorname;
+		this.firstname = firstname;
 		this.lastname = lastname;
 		this.email = email;
 		this.company = company;
 	}
-	public User(String username, String password, String vorname, String lastname, String email, String company) {
+	public User(String username, String password, String firstname, String lastname, String email, String company) {
 		this.username = username;
 		this.password = password;
-		this.vorname = vorname;
+		this.firstname = firstname;
 		this.lastname = lastname;
 		this.email = email;
 		this.company = company;
+	}
+	public User(int id, String firstname, String lastname, String isAdmin) {
+		this.id = id;
+		this.firstname = firstname;
+		this.lastname = lastname;
+		this.isAdmin = isAdmin;
 	}
 	public User(String username, String password) {
 		this.username = username;
 		this.password = password;
 	}
 	
+	public User(String firstname, String lastname, String email, String company) {
+		this.firstname = firstname;
+		this.lastname = lastname;
+		this.email = email;
+		this.company = company;
+	}
 	public int getId() {
 		return id;
 	}
@@ -57,20 +70,20 @@ public class User {
 		this.password = password;
 	}
 	
-	public String getVorname() {
-		return vorname;
+	public String getFirstname() {
+		return firstname;
 	}
 	
-	public void setVorname(String vorname) {
-		this.vorname = vorname;
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
 	}
 	
 	public String getLastname() {
 		return lastname;
 	}
 	
-	public void setLastname(String lasrname) {
-		this.lastname = lasrname;
+	public void setLastname(String lastname) {
+		this.lastname = lastname;
 	}
 	
 	public String getEmail() {
@@ -87,6 +100,14 @@ public class User {
 	
 	public void setCompany(String company) {
 		this.company = company;
+	}
+	
+	public String getIsAdmin() {
+		return isAdmin;
+	}
+	
+	public void setIsAdmin(String isAdmin) {
+		this.isAdmin = isAdmin;
 	}
 	
 }

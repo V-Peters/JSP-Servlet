@@ -1,6 +1,6 @@
-DROP TABLE IF EXISTS `jsp_test`.`meetings`;
+DROP TABLE IF EXISTS `jsp_test`.`meeting`;
 
-CREATE TABLE `jsp_test`.`meetings` (
+CREATE TABLE `jsp_test`.`meeting` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `date_time` datetime NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE `jsp_test`.`meetings` (
 );
 
 
-INSERT INTO `jsp_test`.`meetings` (
+INSERT INTO `jsp_test`.`meeting` (
     `name`,
     `date_time`) 
 VALUES

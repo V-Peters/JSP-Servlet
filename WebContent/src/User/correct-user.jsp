@@ -6,8 +6,8 @@
 
 <body>
 
-	<form name="correctUser" action="../MeetingUserControllerServlet" method=GET>
-		<input type="hidden" name="command" value="LISTMEETINGSUSER" />
+	<form name="correctUser" action="../../MeetingControllerServlet" method=GET>
+		<input type="hidden" name="command" value="LISTMEETINGS" />
 	</form>
 	<script>
 	    document.correctUser.submit();

@@ -17,15 +17,17 @@ https://dev.mysql.com/downloads/windows/installer/8.0.html
 Alternativ ist hier der udemy Link aus dem Kurs zu JSP, Servlets und JDBC:
 https://iks-gmbh.udemy.com/course/jsp-tutorial/learn/lecture/4616792#overview
 
-Jetzt öffnet man MySQL und fügt eine Datenbank hinzu. Hierzu macht man einen Rechtsklick in das linke Feld mit der Überschrift 'Schemas' und wählt die option 'create schema' aus. Es önnet sich ein neuer Tab. In das Feld Name schreibt man jsp_test(es ist wichtig, dass der Name genauso geschrieben ist) und klickt auf das x des Tabs welcher zuvor aufgegangen ist. Das Programm frag, ob man speichern möchte und man speichert.
-Nun klinkt man oben links in der Ecke auf "File" und dann auf "Open SQL Sript" oder man betätigt alternativ die Tastenkombination STR+Umschalt+o. In dem frisch aufgegangenen Fenster wählt man nun die Datei meetings.sql aus und öffnet sie. Anschließend führt man sie durch einen klick auf den gelben Blitz aus und die Tabelle wurde erstellt.
+Jetzt öffnet man MySQL und fügt eine Datenbank hinzu. Hierzu macht man einen Rechtsklick in das linke Feld mit der Überschrift 'Schemas' und wählt die option 'create schema' aus. Es öffet sich ein neuer Tab. In das Feld Name schreibt man jsp_test(es ist wichtig, dass der Name genauso geschrieben ist) und klickt auf das x des Tabs welcher zuvor aufgegangen ist. Das Programm frag, ob man speichern möchte und man speichert.
+Nun klickt man oben links in der Ecke auf "File" und dann auf "Open SQL Sript" oder man betätigt alternativ die Tastenkombination STR+Umschalt+o. In dem frisch aufgegangenen Fenster wählt man nun die Datei meetings.sql aus und öffnet sie. Anschließend führt man sie durch einen klick auf den gelben Blitz aus und die Tabelle wurde erstellt.
 Um dies zu überprüfen macht man nun einen Rechtsklick in das Fenster SCHEMAS links am Bildschirmrand und klickt auf "Refresh All". In dem Order jsp_test/Tables müsste sich nun eine Tabelle meetings befinden. Durch einen Rechtsklick und einen anschließenden klick auf "Select Rows - Limit 1000" kann man sich die Tabelle anzeigen lassen.
+Diesen Vorgang wiederholt man jetzt mit user.sql und meeting_user.sql.
+Diese Datenbanken enthalten nur Beispieldaten, natürlich kann man diesen Schritt überspringen, wenn man seine Anwendung direkt mit richtigen Daten füllen möchte. Es empfielt sich aber die Anwendung einmal mit beispieldaten zu testen, um sicherzugehen, dass man alles richtig eingestellt hat.
 
 Jetzt öffnet man diesen Link:
 http://localhost:8080/JSP_Servlets/
 und schon läuft das Programm.
 
 
-Es funktioniert in der Version übrigens nur der Adminlogin.
+Für den Adminzugang:
 Benutzername: admin
 Passwort: admin

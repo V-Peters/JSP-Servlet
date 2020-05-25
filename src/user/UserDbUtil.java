@@ -14,7 +14,7 @@ import javax.sql.DataSource;
 import javax.xml.ws.Response;
 
 public class UserDbUtil {
-	
+
 	private DataSource dataSource;
 	
 	public UserDbUtil(DataSource dataSource) {
@@ -24,37 +24,38 @@ public class UserDbUtil {
 	public List<User> getUser() {
 		List<User> user = new ArrayList<>();
 		
-		Connection Connection = null;
-		Statement Statement = null;
-		ResultSet ResultSet = null;
+		Connection connection = null;
+		Statement statement = null;
+		ResultSet resultSet = null;
 		
 		try {
-			Connection = dataSource.getConnection();
+			connection = dataSource.getConnection();
 		
 			String sql = "SELECT * FROM jsp_test.user;";
 			
-			Statement = Connection.createStatement();
+			statement = connection.createStatement();
 		
-			ResultSet = Statement.executeQuery(sql);
+			resultSet = statement.executeQuery(sql);
 		
-			while (ResultSet.next()) {
-				int id = ResultSet.getInt("id");
-				String username = ResultSet.getString("username");
-				String password = ResultSet.getString("password");
-				String vorname = ResultSet.getString("vorname");
-				String lastname = ResultSet.getString("lastname");
-				String email= ResultSet.getString("email");
-				String company = ResultSet.getString("company");
+			while (resultSet.next()) {
+				int id = resultSet.getInt("id");
+				String username = resultSet.getString("username");
+				String password = resultSet.getString("password");
+				String firstname = resultSet.getString("firstname");
+				String lastname = resultSet.getString("lastname");
+				String email= resultSet.getString("email");
+				String company = resultSet.getString("company");
 				
-				User tempUser = new User(id, username, password, vorname, lastname, email, company);
+				User tempUser = new User(id, username, password, firstname, lastname, email, company);
 				
 				user.add(tempUser);
 			}
 			
-		} catch (SQLException e) {
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			close(Connection, Statement, ResultSet);
+			close(connection, statement, resultSet);
 		}
 		return user;
 	}
@@ -76,114 +77,138 @@ public class UserDbUtil {
 		}
 	}
 
-	public void addUser(User user) throws Exception{
+	public boolean addUser(HttpServletResponse response, User user) {
 		
-		Connection Connection = null;
-		PreparedStatement Statement = null;
-		ResultSet ResultSet = null;
+		Connection connection = null;
+		PreparedStatement statementSelect = null;
+		PreparedStatement statementInsert = null;
+		ResultSet resultSet = null;
 		
 		try {
-			Connection = dataSource.getConnection();
+			connection = dataSource.getConnection();
 
-			String sqlSelect = "SELECT `username` FROM `jsp_test`.`user` WHERE username = ?;";
-			Statement = Connection.prepareStatement(sqlSelect);
+			String sqlSelect1 = "SELECT `username` FROM `jsp_test`.`user` WHERE username = ?;";
+			statementSelect = connection.prepareStatement(sqlSelect1);
 			
-			Statement.setString(1, user.getUsername());
+			statementSelect.setString(1, user.getUsername());
 
-			ResultSet = Statement.executeQuery();
+			resultSet = statementSelect.executeQuery();
 			
-			if (!ResultSet.next()) {
-				String sqlInsert = "INSERT INTO `jsp_test`.`user` (`username`, `password`, `vorname`, `lastname`, `email`, `company`) VALUES (?, ?, ?, ?, ?, ?);";
-				Statement = Connection.prepareStatement(sqlInsert);
+			if (!resultSet.next()) {
+				String sqlInsert = "INSERT INTO `jsp_test`.`user` (`username`, `password`, `firstname`, `lastname`, `email`, `company`) VALUES (?, ?, ?, ?, ?, ?);";
+				statementInsert = connection.prepareStatement(sqlInsert);
 				
-				Statement.setString(1, user.getUsername());
-				Statement.setString(2, user.getPassword());
-				Statement.setString(3, user.getVorname());
-				Statement.setString(4, user.getLastname());
-				Statement.setString(5, user.getEmail());
-				Statement.setString(6, user.getCompany());
+				statementInsert.setString(1, user.getUsername());
+				statementInsert.setString(2, user.getPassword());
+				statementInsert.setString(3, user.getFirstname());
+				statementInsert.setString(4, user.getLastname());
+				statementInsert.setString(5, user.getEmail());
+				statementInsert.setString(6, user.getCompany());
 				
-				Statement.execute();
-			} else {
-				throw new Exception("Es gibt bereits einen Benutzer mit diesem Namen: " + user.getUsername());
-			}
-			
+				statementInsert.execute();
+
+				User tempUser = getUser(user.getUsername());
+
+				this.createCookies(response, tempUser);
+				return true;
+			}			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println("Es gibt bereits einen Benutzer mit diesem Namen: " + user.getUsername());
+			e.printStackTrace();
 		}
 		finally {
-			close(Connection, Statement, null);
+			close(connection, statementSelect, resultSet);
+			close(null, statementInsert, null);
 		}
-		
+		return false;
 	}
 
-	public boolean loginUser(HttpServletResponse response, User user) throws Exception{
+	public boolean loginUser(HttpServletResponse response, User user) {
 		
-		Connection Connection = null;
-		PreparedStatement Statement = null;
-		ResultSet ResultSet = null;
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
 		
 		try {
-			Connection = dataSource.getConnection();
+			connection = dataSource.getConnection();
 
-			String sqlSelect = "SELECT `password` FROM `jsp_test`.`user` WHERE username = \"" + user.getUsername() + "\";";
-//			System.out.println(sqlSelect);
-			Statement = Connection.prepareStatement(sqlSelect);
+			String sqlSelect = "SELECT `password` FROM `jsp_test`.`user` WHERE username = ?;";
+			statement = connection.prepareStatement(sqlSelect);
 			
-//			Statement.setString(1, user.getUsername());
+			statement.setString(1, user.getUsername());
 
-			ResultSet = Statement.executeQuery();
+			resultSet = statement.executeQuery();
 			
-			if (ResultSet.next()) {
-//				System.out.println(ResultSet.getString("password"));
-//				System.out.println(user.getPassword());
-//				System.out.println(ResultSet.getString("password"));
-//				System.out.println(user.getPassword());
-				if (ResultSet.getString("password").equals(user.getPassword())) {
-					this.createCookie(response, user);
+			if (resultSet.next()) {
+				if (resultSet.getString("password").equals(user.getPassword())) {
+					User tempUser = this.getUser(user.getUsername());
+					this.createCookies(response, tempUser);
 					return true;
 				}
-			} else {
-				throw new Exception("Es gibt keinen Benutzer mit diesem Namen: " + user.getUsername());
 			}
-			return false;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			System.out.println("Es gibt keinen Benutzer mit diesem Namen: " + user.getUsername());
+			e.printStackTrace();
 		}
 		finally {
-			close(Connection, Statement, null);
+			close(connection, statement, resultSet);
 		}
+		return false;
 	}
 
-	private void createCookie(HttpServletResponse response, User user) throws Exception {
-		Cookie userCookie = new Cookie("JSP.userId", this.getUserId(user));
-		userCookie.setMaxAge(60*30);
-		response.addCookie(userCookie);
-	}
-
-	public String getUserId(User user) throws Exception{
+	private void createCookies(HttpServletResponse response, User user) {
 		
-		Connection Connection = null;
-		PreparedStatement Statement = null;
-		ResultSet ResultSet = null;
-		String userId;
+		Cookie userIdCookie = new Cookie("JSP.userId", user.getId() + "");
+		Cookie userFirstnameCookie = new Cookie("JSP.userFirstname", user.getFirstname());
+		Cookie userLastnameCookie = new Cookie("JSP.userLastname", user.getLastname());
+		Cookie userIsAdminCookie = new Cookie("JSP.userIsAdmin", user.getIsAdmin());
+		
+		userIdCookie.setMaxAge(60*30);
+		userFirstnameCookie.setMaxAge(60*30);
+		userLastnameCookie.setMaxAge(60*30);
+		userIsAdminCookie.setMaxAge(60*30);
+		
+		response.addCookie(userIdCookie);
+		response.addCookie(userFirstnameCookie);
+		response.addCookie(userLastnameCookie);
+		response.addCookie(userIsAdminCookie);
+		
+	}
+	
+	private User getUser(String username) {
+
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
 		
 		try {
-			Connection = dataSource.getConnection();
-
-			String sqlSelect = "SELECT `id` FROM `jsp_test`.`user` WHERE `username` = ?;";
-			Statement = Connection.prepareStatement(sqlSelect);
-
-			Statement.setString(1, user.getUsername());
-
-			ResultSet = Statement.executeQuery();
+			connection = dataSource.getConnection();
 			
-			if (ResultSet.next()) {
-				userId = ResultSet.getString("id");
-			} else {
-				throw new Exception("Es gibt keinen Benutzer mit diesem Namen: " + user.getUsername());
-			}
-			return userId;
-		}
-		finally {
-			close(Connection, Statement, null);
-		}
-	}
+			String sqlSelect2 = "SELECT `id`, `firstname`, `lastname`, `is_admin` FROM `jsp_test`.`user` WHERE username = ?;";
+			statement = connection.prepareStatement(sqlSelect2);
+		
+			statement.setString(1, username);
+	
+			resultSet = statement.executeQuery();
+			if (resultSet.next()) {
 
+				int id = resultSet.getInt("id");
+				String firstname = resultSet.getString("firstname");
+				String lastname = resultSet.getString("lastname");
+				String isAdmin = resultSet.getString("is_admin");
+		
+				User tempUser = new User(id, firstname, lastname, isAdmin);
+
+				return tempUser;
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("null wird zurück gegeben.");
+		return null;
+		
+	}
 }

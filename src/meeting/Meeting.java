@@ -1,4 +1,4 @@
-package meetings;
+package meeting;
 
 public class Meeting {
 	
