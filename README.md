@@ -24,7 +24,7 @@ Diesen Vorgang wiederholt man jetzt mit user.sql und meeting_user.sql.
 Diese Datenbanken enthalten nur Beispieldaten, natürlich kann man diesen Schritt überspringen, wenn man seine Anwendung direkt mit richtigen Daten füllen möchte. Es empfielt sich aber die Anwendung einmal mit beispieldaten zu testen, um sicherzugehen, dass man alles richtig eingestellt hat.
 
 Jetzt öffnet man diesen Link:
-http://localhost:8080/JSP_Servlets/
+http://localhost:8080/JSP_Servlets/src/index.html
 und schon läuft das Programm.
 
 
