@@ -28,5 +28,5 @@ VALUES
 	('vpet', '12345', 'Victor', 'Peters', 'V.Peters@iks-gmbh.com', 'IKS', 0),
 	('mmus', '12345', 'Max', 'Mustermann', 'M.Mustermann@beispielfirma.com', 'Beispielfirma', 0),
 	('gdin', '12345', 'Gerda', 'Dinkel', 'G.Dinkel@email.com', 'Post', 0),
-	('sfle', '12345', 'Sammy', 'Fleischbällschen', 'S.Fleisch@hotmail.com', 'Burgerking', 0),
+	('sfle', '12345', 'Sammy', 'Fleischbällchen', 'S.Fleisch@hotmail.com', 'Burgerking', 0),
 	('smue', '12345', 'Sabine', 'Müller', 'S.Müller@gmail.com', 'DHL', 0);

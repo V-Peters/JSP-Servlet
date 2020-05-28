@@ -16,11 +16,10 @@ INSERT INTO `jsp_test`.`meeting` (
     `name`,
     `date_time`) 
 VALUES
-	('Thementag 1', '2020-01-01 00:00:00'),
-	('dies ist ein Test', '2020-01-01 00:00:00'),
-	('dies ist ein anderer Test', '2020-01-01 00:00:00'),
-	('Veranstaltungen hinzufügen geht', '2020-01-01 00:00:00'),
-	('nur mit den Umlauten scheint es Probleme zu geben', '2020-01-01 00:00:00'),
-	('Änderungen übernehmen klappt noch nicht, soll aber auch nur dazu da sein die Veränderungen in der', '2020-01-01 00:00:00'),
-	('Spalte "anzeigen?" zu speichern, man kann sie aber auch über den Link bearbeiten verändern', '2020-01-01 00:00:00'),
-	('Viel Spaß mit diesem Test', '2020-01-01 00:00:00');
+	('Thementag 1', '2020-06-01 10:00:00'),
+	('Ernährungsberatung', '2020-06-01 12:00:00'),
+	('Workshop Datenverwaltung', '2020-06-01 14:00:00'),
+	('Vortrag Algorithmen', '2020-06-20 10:30:00'),
+	('Vartrag Datenstrukturen', '2020-06-20 12:30:00'),
+	('SQL Einführung', '2020-06-06 08:30:00'),
+	('Einführung in komplexe Systeme', '2020-06-06 15:00:00');
