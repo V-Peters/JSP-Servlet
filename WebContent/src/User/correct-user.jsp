@@ -9,6 +9,7 @@
 	<form name="correctUser" action="../../MeetingControllerServlet" method=GET>
 		<input type="hidden" name="command" value="LISTMEETINGS" />
 	</form>
+	
 	<script>
 	    document.correctUser.submit();
 	</script>

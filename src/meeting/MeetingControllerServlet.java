@@ -1,11 +1,7 @@
 package meeting;
 
-import java.io.IOException;
 import java.util.List;
-
 import javax.annotation.Resource;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
@@ -13,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
+import direction.DirectionUtil;
 import meetingUser.MeetingUserDbUtil;
 import user.User;
 
@@ -32,20 +29,22 @@ public class MeetingControllerServlet extends HttpServlet {
 
 	private MeetingDbUtil meetingDbUtil;
 	private MeetingUserDbUtil meetingUserDbUtil;
+	private DirectionUtil directionUtil;
 	
 	@Resource(name="jdbc/jsp_test")
 	private DataSource dataSource;
 	
 
 	@Override
-	public void init() throws ServletException {
-		super.init();
-		
+	public void init() {
 		try {
+			super.init();
+		
 			meetingDbUtil = new MeetingDbUtil(dataSource);
 			meetingUserDbUtil = new MeetingUserDbUtil(dataSource);
+			directionUtil = new DirectionUtil();
 		} catch (Exception e) {
-			throw new ServletException(e);
+			e.printStackTrace();
 		}
 	}
 
@@ -70,7 +69,6 @@ public class MeetingControllerServlet extends HttpServlet {
 					}
 				}
 			}
-			
 			
 			switch (command) {
 				case LISTMEETINGS:
@@ -101,8 +99,7 @@ public class MeetingControllerServlet extends HttpServlet {
 			}
 			
 		} catch (Exception e) {
-			// TODO
-			System.out.println("Falscher Parameter");
+			directionUtil.parameterErrorDirect(response);
 			e.printStackTrace();
 		}
 		
@@ -110,22 +107,16 @@ public class MeetingControllerServlet extends HttpServlet {
 
 	private void listParticipants(HttpServletRequest request, HttpServletResponse response, String meetingId) {
 		
-		Meeting meeting = meetingDbUtil.getMeeting(meetingId);
-		List<User> userForMeetings = meetingUserDbUtil.getUserForMeeting(meetingId);
+		Meeting meeting = meetingDbUtil.getMeeting(meetingId, response);
+		List<User> userForMeetings = meetingUserDbUtil.getUserForMeeting(meetingId, response);
 		boolean isEmpty = userForMeetings.isEmpty();
 
 		request.setAttribute("MEETING", meeting);
 		request.setAttribute("USERFORMEETING", userForMeetings);
 		request.setAttribute("ISEMPTY", isEmpty);
 		
-		RequestDispatcher dispatcher = request.getRequestDispatcher("src/Meeting/list-user-for-meeting.jsp");
-		try {
-			dispatcher.forward(request, response);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		directionUtil.forward(request, response, "src/Meeting/list-user-for-meeting.jsp");
+
 	}
 
 	private void refreshMeetings(HttpServletRequest request, HttpServletResponse response) {
@@ -137,7 +128,7 @@ public class MeetingControllerServlet extends HttpServlet {
 			if (request.getParameter("display" + counter) != null) {
 				value = 1;
 			}
-			meetingDbUtil.refreshMeetings(value, Integer.parseInt(request.getParameter("display" + counter + "hidden")));
+			meetingDbUtil.refreshMeetings(value, Integer.parseInt(request.getParameter("display" + counter + "hidden")), response);
 			counter++;
 		}
 		this.redirect(response);
@@ -148,7 +139,7 @@ public class MeetingControllerServlet extends HttpServlet {
 		
 		String meeting = request.getParameter("meetingId");
 		
-		meetingDbUtil.deleteMeeting(meeting);
+		meetingDbUtil.deleteMeeting(meeting, response);
 		
 		this.redirect(response);		
 	}
@@ -160,80 +151,63 @@ public class MeetingControllerServlet extends HttpServlet {
 		String date = request.getParameter("year") + "-" + request.getParameter("month") + "-" + request.getParameter("day");
 		String time = request.getParameter("hour") + ":" + request.getParameter("minute") + ":00";
 		boolean display = false;
+		
 		if (request.getParameter("display") != null) {
 			display = true;
 		}
 		
 		Meeting meeting = new Meeting(id, name, date, time, display);
 		
-		meetingDbUtil.updateMeeting(meeting);
+		meetingDbUtil.updateMeeting(meeting, response);
 		
-		this.redirect(response);		
+		this.redirect(response);
+		
 	}
 
 	private void loadMeeting(HttpServletRequest request, HttpServletResponse response) {
 
 		String meetingId = request.getParameter("meetingId");
 		
-		Meeting meeting = meetingDbUtil.getMeeting(meetingId);
+		Meeting meeting = meetingDbUtil.getMeeting(meetingId, response);
 		
 		request.setAttribute("MEETING", meeting);
 		
-		RequestDispatcher dispatcher = request.getRequestDispatcher("src/Meeting/meeting-update.jsp");
-		this.forward(dispatcher, request, response);
+		directionUtil.forward(request, response, "src/Meeting/meeting-update.jsp");
+		
 	}
 
-	private void addMeeting(HttpServletRequest request, HttpServletResponse response) throws Exception {
+	private void addMeeting(HttpServletRequest request, HttpServletResponse response) {
 
 		String name = request.getParameter("name");
 		String date = request.getParameter("year") + "-" + request.getParameter("month") + "-" + request.getParameter("day");
 		String time = request.getParameter("hour") + ":" + request.getParameter("minute") + ":00";
 		boolean display = false;
+		
 		if (request.getParameter("display") != null) {
 			display = true;
 		}
 		
 		Meeting meeting = new Meeting(name, date, time, display);
 		
-		meetingDbUtil.addMeeting(meeting);
+		meetingDbUtil.addMeeting(meeting, response);
 		
 		this.redirect(response);
 	}
 
 	private void listMeetings(HttpServletRequest request, HttpServletResponse response, String userId) {
 
-		List<Meeting> meetings = meetingDbUtil.getMeetings();
-		List<String> meetingsSignedUp = meetingUserDbUtil.getMeetingForUser(userId);
+		List<Meeting> meetings = meetingDbUtil.getMeetings(response);
+		List<String> meetingsSignedUp = meetingUserDbUtil.getMeetingForUser(userId, response);
 
 		request.setAttribute("MEETING_LIST", meetings);
 		request.setAttribute("MEETINGS_SIGNED_UP", meetingsSignedUp);
 		
-		RequestDispatcher dispatcher = request.getRequestDispatcher("src/Meeting/meeting-list.jsp");
-		try {
-			dispatcher.forward(request, response);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		directionUtil.forward(request, response, "src/Meeting/meeting-list.jsp");
 		
 	}
 	
 	private void redirect(HttpServletResponse response) {
-		try {
-			response.sendRedirect("MeetingControllerServlet");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		directionUtil.direct(response, "MeetingControllerServlet");
 	}
 	
-	private void forward(RequestDispatcher dispatcher, HttpServletRequest request, HttpServletResponse response) {
-		try {
-			dispatcher.forward(request, response);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 }

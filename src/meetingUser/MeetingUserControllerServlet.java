@@ -1,17 +1,14 @@
 package meetingUser;
 
-import java.io.IOException;
-import java.util.List;
-
 import javax.annotation.Resource;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+
+import direction.DirectionUtil;
 
 /**
  * Servlet implementation class MeetingUserControllerServlet
@@ -22,21 +19,22 @@ public class MeetingUserControllerServlet extends HttpServlet {
 	private static final String SIGNUPUSERFORMEETING = "SIGNUPUSERFORMEETING";
 
 	private MeetingUserDbUtil meetingUserDbUtil;
-
-	private String userId = "0";
+	private DirectionUtil directionUtil;
 	
 	@Resource(name="jdbc/jsp_test")
 	private DataSource dataSource;
 
 
 	@Override
-	public void init() throws ServletException {
-		super.init();
+	public void init() {
 		
 		try {
+			super.init();
+		
 			meetingUserDbUtil = new MeetingUserDbUtil(dataSource);
+			directionUtil = new DirectionUtil();
 		} catch (Exception e) {
-			throw new ServletException(e);
+			e.printStackTrace();;
 		}
 	}
 
@@ -46,14 +44,13 @@ public class MeetingUserControllerServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			String command = request.getParameter("command");
+			String userId = "0";
 			
-
 			Cookie[] cookies = request.getCookies();
 			if (cookies != null) {
 				for (Cookie tempCookie : cookies) {
 					if ("JSP.userId".equals(tempCookie.getName())){
 						userId = tempCookie.getValue();
-//						System.out.println("userId: " + userId);
 						break;
 					}
 				}
@@ -66,21 +63,22 @@ public class MeetingUserControllerServlet extends HttpServlet {
 			
 			switch (command) {
 				case SIGNUPUSERFORMEETING:
-					signUpUserForMeeting(request, response);
+					signUpUserForMeeting(request, response, userId);
 					break;
 	
 				default:
-					signUpUserForMeeting(request, response);
+					signUpUserForMeeting(request, response, userId);
 					break;
 			}
 			
 		} catch (Exception e) {
-			// TODO: handle exception
+			directionUtil.parameterErrorDirect(response);
+			e.printStackTrace();
 		}
 		
 	}
 
-	private void signUpUserForMeeting(HttpServletRequest request, HttpServletResponse response) {
+	private void signUpUserForMeeting(HttpServletRequest request, HttpServletResponse response, String userId) {
 
 		int counter = 1;
 		int value = 0;
@@ -89,19 +87,10 @@ public class MeetingUserControllerServlet extends HttpServlet {
 			if (request.getParameter("signup" + counter) != null) {
 				value = 1;
 			}
-			meetingUserDbUtil.signUpUserForMeeting(value, userId, request.getParameter("signup" + counter + "hidden"));
+			meetingUserDbUtil.signUpUserForMeeting(value, userId, request.getParameter("signup" + counter + "hidden"), response);
 			counter++;
 		}
-		this.redirect(response);
+		directionUtil.direct(response, "MeetingControllerServlet");
 	}
 	
-	private void redirect(HttpServletResponse response) {
-		try {
-			response.sendRedirect("MeetingControllerServlet");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 }

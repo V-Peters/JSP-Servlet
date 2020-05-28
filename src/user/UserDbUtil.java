@@ -3,64 +3,24 @@ package user;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import javax.xml.ws.Response;
+
+import direction.DirectionUtil;
 
 public class UserDbUtil {
 
 	private DataSource dataSource;
+	private DirectionUtil directionUtil;
 	
 	public UserDbUtil(DataSource dataSource) {
 		this.dataSource = dataSource;
+		directionUtil = new DirectionUtil();
 	}
 	
-	public List<User> getUser() {
-		List<User> user = new ArrayList<>();
-		
-		Connection connection = null;
-		Statement statement = null;
-		ResultSet resultSet = null;
-		
-		try {
-			connection = dataSource.getConnection();
-		
-			String sql = "SELECT * FROM jsp_test.user;";
-			
-			statement = connection.createStatement();
-		
-			resultSet = statement.executeQuery(sql);
-		
-			while (resultSet.next()) {
-				int id = resultSet.getInt("id");
-				String username = resultSet.getString("username");
-				String password = resultSet.getString("password");
-				String firstname = resultSet.getString("firstname");
-				String lastname = resultSet.getString("lastname");
-				String email= resultSet.getString("email");
-				String company = resultSet.getString("company");
-				
-				User tempUser = new User(id, username, password, firstname, lastname, email, company);
-				
-				user.add(tempUser);
-			}
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			close(connection, statement, resultSet);
-		}
-		return user;
-	}
-
-	private void close(Connection connection, Statement statemet, ResultSet resultSet) {
+	private void close(Connection connection, Statement statemet, ResultSet resultSet, HttpServletResponse response) {
 		try {
 			if (resultSet != null) {
 				resultSet.close();
@@ -74,6 +34,7 @@ public class UserDbUtil {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			directionUtil.closeErrorDirect(response);
 		}
 	}
 
@@ -107,19 +68,18 @@ public class UserDbUtil {
 				
 				statementInsert.execute();
 
-				User tempUser = getUser(user.getUsername());
+				User tempUser = getUser(user.getUsername(), response);
 
-				this.createCookies(response, tempUser);
+				this.createCookies(response, tempUser, 60 * 30);
 				return true;
 			}			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println("Es gibt bereits einen Benutzer mit diesem Namen: " + user.getUsername());
 			e.printStackTrace();
+			directionUtil.databaseErrorDirect(response);
 		}
 		finally {
-			close(connection, statementSelect, resultSet);
-			close(null, statementInsert, null);
+			close(connection, statementSelect, resultSet, response);
+			close(null, statementInsert, null, response);
 		}
 		return false;
 	}
@@ -142,34 +102,33 @@ public class UserDbUtil {
 			
 			if (resultSet.next()) {
 				if (resultSet.getString("password").equals(user.getPassword())) {
-					User tempUser = this.getUser(user.getUsername());
-					this.createCookies(response, tempUser);
+					User tempUser = this.getUser(user.getUsername(), response);
+					this.createCookies(response, tempUser, 60 * 30);
 					return true;
 				}
 			}
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			System.out.println("Es gibt keinen Benutzer mit diesem Namen: " + user.getUsername());
 			e.printStackTrace();
+			directionUtil.databaseErrorDirect(response);
 		}
 		finally {
-			close(connection, statement, resultSet);
+			close(connection, statement, resultSet, response);
 		}
 		return false;
 	}
 
-	private void createCookies(HttpServletResponse response, User user) {
-		
+	public void createCookies(HttpServletResponse response, User user, int timer) {
+
 		Cookie userIdCookie = new Cookie("JSP.userId", user.getId() + "");
 		Cookie userFirstnameCookie = new Cookie("JSP.userFirstname", user.getFirstname());
 		Cookie userLastnameCookie = new Cookie("JSP.userLastname", user.getLastname());
 		Cookie userIsAdminCookie = new Cookie("JSP.userIsAdmin", user.getIsAdmin());
-		
-		userIdCookie.setMaxAge(60*30);
-		userFirstnameCookie.setMaxAge(60*30);
-		userLastnameCookie.setMaxAge(60*30);
-		userIsAdminCookie.setMaxAge(60*30);
-		
+
+		userIdCookie.setMaxAge(timer);
+		userFirstnameCookie.setMaxAge(timer);
+		userLastnameCookie.setMaxAge(timer);
+		userIsAdminCookie.setMaxAge(timer);
+
 		response.addCookie(userIdCookie);
 		response.addCookie(userFirstnameCookie);
 		response.addCookie(userLastnameCookie);
@@ -177,7 +136,7 @@ public class UserDbUtil {
 		
 	}
 	
-	private User getUser(String username) {
+	private User getUser(String username, HttpServletResponse response) {
 
 		Connection connection = null;
 		PreparedStatement statement = null;
@@ -203,9 +162,9 @@ public class UserDbUtil {
 
 				return tempUser;
 			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
+			directionUtil.databaseErrorDirect(response);
 		}
 		System.out.println("null wird zurück gegeben.");
 		return null;

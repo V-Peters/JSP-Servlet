@@ -3,22 +3,26 @@ package meeting;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
+
+import direction.DirectionUtil;
 
 public class MeetingDbUtil {
 	
 	private DataSource dataSource;
+	private DirectionUtil directionUtil;
 	
 	public MeetingDbUtil(DataSource dataSource) {
 		this.dataSource = dataSource;
+		directionUtil = new DirectionUtil();
 	}
 	
-	public List<Meeting> getMeetings() {
+	public List<Meeting> getMeetings(HttpServletResponse response) {
 		List<Meeting> meetings = new ArrayList<>();
 		
 		Connection connection = null;
@@ -46,15 +50,16 @@ public class MeetingDbUtil {
 				meetings.add(tempMeeting);
 			}
 			
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			directionUtil.databaseErrorDirect(response);
 		} finally {
-			close(connection, statement, resultSet);
+			close(connection, statement, resultSet, response);
 		}
 		return meetings;
 	}
 
-	private void close(Connection connection, Statement statemet, ResultSet resultSet) {
+	private void close(Connection connection, Statement statemet, ResultSet resultSet, HttpServletResponse response) {
 		try {
 			if (resultSet != null) {
 				resultSet.close();
@@ -68,10 +73,11 @@ public class MeetingDbUtil {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			directionUtil.closeErrorDirect(response);
 		}
 	}
 
-	public void addMeeting(Meeting meeting) {
+	public void addMeeting(Meeting meeting, HttpServletResponse response) {
 		
 		Connection connection = null;
 		PreparedStatement statement = null;
@@ -95,14 +101,15 @@ public class MeetingDbUtil {
 			statement.execute();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
+			directionUtil.databaseErrorDirect(response);
 		} finally {
-			close(connection, statement, null);
+			close(connection, statement, null, response);
 		}
 		
 	}
 
-	public Meeting getMeeting(String meetingsId) {
+	public Meeting getMeeting(String meetingsId, HttpServletResponse response) {
 		Meeting meeting = null;
 	
 		Connection connection = null;
@@ -132,17 +139,18 @@ public class MeetingDbUtil {
 				
 				meeting = new Meeting(id, name, date, time, display);
 			} else {
-				throw new Exception("Could not find meeting id: " + mettingsId);
+				System.out.println("Could not find meeting id: " + mettingsId);
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
+			directionUtil.databaseErrorDirect(response);
 		} finally {
-			close(connection, statement, resultSet);
+			close(connection, statement, resultSet, response);
 		}
 		return meeting;
 	}
 
-	public void updateMeeting(Meeting meeting) {
+	public void updateMeeting(Meeting meeting, HttpServletResponse response) {
 		
 		Connection connectoion = null;
 		PreparedStatement statement = null;
@@ -163,14 +171,15 @@ public class MeetingDbUtil {
 			
 			statement.execute();
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
+			directionUtil.databaseErrorDirect(response);
 		} finally {
-			close(connectoion, statement, null);
+			close(connectoion, statement, null, response);
 		}
 		
 	}
 
-	public void deleteMeeting(String meeting) {
+	public void deleteMeeting(String meeting, HttpServletResponse response) {
 		
 		Connection connection = null;
 		PreparedStatement statement = null;
@@ -190,17 +199,19 @@ public class MeetingDbUtil {
 			statement.execute();
 			
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
+			directionUtil.databaseErrorDirect(response);
 		} finally {
-			close(connection, statement, null);
+			close(connection, statement, null, response);
 		}
 		
 	}
 
-	public void refreshMeetings(int value, int id) {
+	public void refreshMeetings(int value, int id, HttpServletResponse response) {
 		
 		Connection connection = null;
-		PreparedStatement statement = null;
+		PreparedStatement statementSelect = null;
+		PreparedStatement statementUpdate = null;
 		ResultSet resultSet = null;
 		
 		try {
@@ -209,11 +220,11 @@ public class MeetingDbUtil {
 			
 			String sql1 = "SELECT display FROM jsp_test.meeting WHERE id = ?;";
 			
-			statement = connection.prepareStatement(sql1);
+			statementSelect = connection.prepareStatement(sql1);
 			
-			statement.setInt(1, id);
+			statementSelect.setInt(1, id);
 			
-			resultSet = statement.executeQuery();
+			resultSet = statementSelect.executeQuery();
 			
 			if(resultSet.next()) {
 				int display = resultSet.getInt("display");
@@ -221,21 +232,23 @@ public class MeetingDbUtil {
 				if (display != value) {
 					String sql2 = "UPDATE jsp_test.meeting SET display = ?, last_updated = now() WHERE id = ?";
 					
-					statement = connection.prepareStatement(sql2);
+					statementUpdate = connection.prepareStatement(sql2);
 					
-					statement.setInt(1, value);
-					statement.setInt(2, id);
+					statementUpdate.setInt(1, value);
+					statementUpdate.setInt(2, id);
 					
-					statement.execute();
+					statementUpdate.execute();
 				}
 				
 			} else {
 				System.out.println("Could not find meeting id: " + id);
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
+			directionUtil.databaseErrorDirect(response);
 		} finally {
-			close(connection, statement, resultSet);
+			close(connection, statementSelect, resultSet, response);
+			close(null, statementUpdate, null, response);
 		}
 		
 	}

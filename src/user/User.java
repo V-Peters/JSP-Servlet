@@ -11,30 +11,19 @@ public class User {
 	private String company;
 	private String isAdmin;
 	
-	
-	public User(int id, String username, String password, String firstname, String lastname, String email, String company) {
-		this.id = id;
-		this.username = username;
-		this.password = password;
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.email = email;
-		this.company = company;
-	}
 	public User(String username, String password, String firstname, String lastname, String email, String company) {
+		this(firstname, lastname, email, company);
 		this.username = username;
 		this.password = password;
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.email = email;
-		this.company = company;
 	}
+	
 	public User(int id, String firstname, String lastname, String isAdmin) {
 		this.id = id;
 		this.firstname = firstname;
 		this.lastname = lastname;
 		this.isAdmin = isAdmin;
 	}
+	
 	public User(String username, String password) {
 		this.username = username;
 		this.password = password;
@@ -46,6 +35,7 @@ public class User {
 		this.email = email;
 		this.company = company;
 	}
+	
 	public int getId() {
 		return id;
 	}

@@ -3,25 +3,26 @@ package meetingUser;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
+import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-
+import direction.DirectionUtil;
 import meeting.Meeting;
 import user.User;
 
 public class MeetingUserDbUtil {
 	
 	private DataSource dataSource;
+	private DirectionUtil directionUtil;
 	
 	public MeetingUserDbUtil(DataSource dataSource) {
 		this.dataSource = dataSource;
+		directionUtil = new DirectionUtil();
 	}
 	
-	public List<Meeting> getMeetings() {
+	public List<Meeting> getMeetings(HttpServletResponse response) {
 		List<Meeting> meetings = new ArrayList<>();
 		
 		Connection connection = null;
@@ -49,15 +50,16 @@ public class MeetingUserDbUtil {
 				meetings.add(tempMeeting);
 			}
 			
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			directionUtil.databaseErrorDirect(response);
 		} finally {
-			close(connection, statement, resultSet);
+			close(connection, statement, resultSet, response);
 		}
 		return meetings;
 	}
 
-	private void close(Connection connection, Statement statemet, ResultSet resultSet) {
+	private void close(Connection connection, Statement statemet, ResultSet resultSet, HttpServletResponse response) {
 		try {
 			if (resultSet != null) {
 				resultSet.close();
@@ -71,13 +73,16 @@ public class MeetingUserDbUtil {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+			directionUtil.closeErrorDirect(response);
 		}
 	}
 
-	public void signUpUserForMeeting(int value, String userId, String meetingId) {
+	public void signUpUserForMeeting(int value, String userId, String meetingId, HttpServletResponse response) {
 		
 		Connection connection = null;
-		PreparedStatement statement = null;
+		PreparedStatement statementSelect = null;
+		PreparedStatement statementDelete = null;
+		PreparedStatement statementInsert = null;
 		ResultSet resultSet = null;
 		
 		try {
@@ -86,48 +91,48 @@ public class MeetingUserDbUtil {
 			
 			String sqlGet = "SELECT id FROM jsp_test.meeting_user WHERE id_user = ? AND id_meeting = ?;";
 			
-			statement = connection.prepareStatement(sqlGet);
+			statementSelect = connection.prepareStatement(sqlGet);
 
-			statement.setString(1, userId);
-			statement.setString(2, meetingId);
+			statementSelect.setString(1, userId);
+			statementSelect.setString(2, meetingId);
 			
-			resultSet = statement.executeQuery();
+			resultSet = statementSelect.executeQuery();
 
 			
 			if(resultSet.next()) {
 				if (value == 0) {
 					String sqlDelete = "DELETE FROM jsp_test.meeting_user WHERE id = ?;";
 
-					statement = connection.prepareStatement(sqlDelete);
+					statementDelete = connection.prepareStatement(sqlDelete);
 					
-					statement.setString(1, resultSet.getString("id"));
+					statementDelete.setString(1, resultSet.getString("id"));
 
-//					System.out.println(sqlDelete);
-					
-					statement.execute();
+					statementDelete.execute();
 				}
 			} else {
 				if (value == 1) {
 					String sqlInsert = "INSERT INTO `jsp_test`.`meeting_user` (`id_meeting`, `id_user`) VALUES (?, ?);";
 					
-					statement = connection.prepareStatement(sqlInsert);
+					statementInsert = connection.prepareStatement(sqlInsert);
 					
-					statement.setString(1, meetingId);
-					statement.setString(2, userId);
+					statementInsert.setString(1, meetingId);
+					statementInsert.setString(2, userId);
 					
-					statement.execute();
+					statementInsert.execute();
 					
 				}
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			directionUtil.databaseErrorDirect(response);
 		} finally {
-			close(connection, statement, resultSet);
+			close(connection, statementSelect, resultSet, response);
+			close(null, statementDelete, null, response);
+			close(null, statementInsert, null, response);
 		}
 		
 	}
 
-	public List<String> getMeetingForUser(String userId) {
+	public List<String> getMeetingForUser(String userId, HttpServletResponse response) {
 		List<String> meetingIds = new ArrayList<>();
 		
 		Connection connection = null;
@@ -150,61 +155,48 @@ public class MeetingUserDbUtil {
 				meetingIds.add(resultSet.getString("id_meeting"));
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			directionUtil.databaseErrorDirect(response);
 		} finally {
-			close(connection, statement, resultSet);
+			close(connection, statement, resultSet, response);
 		}
 		return meetingIds;
 	}
 
-	public List<User> getUserForMeeting(String meetingId) {
+	public List<User> getUserForMeeting(String meetingId, HttpServletResponse response) {
 		List<User> userIds = new ArrayList<>();
 		
 		Connection connection = null;
-		PreparedStatement statementSelectUserId = null;
-		PreparedStatement statementSelectUser = null;
-		ResultSet resultSetUserId = null;
-		ResultSet resultSetUser = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet = null;
 		
 		try {
-			
+
 			connection = dataSource.getConnection();
 			
-			String sqlSelectUserId = "SELECT id_user FROM jsp_test.meeting_user WHERE id_meeting = ? ORDER BY id_user ASC;";
+			String sql = "SELECT firstname, lastname, email, company FROM jsp_test.user JOIN jsp_test.meeting_user ON jsp_test.user.id = jsp_test.meeting_user.id_user WHERE id_meeting = ?;";
 			
-			statementSelectUserId = connection.prepareStatement(sqlSelectUserId);
+			statement = connection.prepareStatement(sql);
 			
-			statementSelectUserId.setString(1, meetingId);
+			statement.setString(1, meetingId);
 			
-			resultSetUserId = statementSelectUserId.executeQuery();
+			resultSet = statement.executeQuery();
 			
-			while(resultSetUserId.next()) {
+			while (resultSet.next()) {
 				
-				String sqlSelectUser = "SELECT firstname, lastname, email, company FROM jsp_test.user WHERE id = ?;";
-				
-				statementSelectUser = connection.prepareStatement(sqlSelectUser);
-				
-				statementSelectUser.setString(1, resultSetUserId.getString("id_user"));
-				
-				resultSetUser = statementSelectUser.executeQuery();
-				
-				while (resultSetUser.next()) {
-					
-					String firstname = resultSetUser.getString("firstname");
-					String lastname = resultSetUser.getString("lastname");
-					String email = resultSetUser.getString("email");
-					String company = resultSetUser.getString("company");
+				String firstname = resultSet.getString("firstname");
+				String lastname = resultSet.getString("lastname");
+				String email = resultSet.getString("email");
+				String company = resultSet.getString("company");
 
-					User tempUser = new User(firstname, lastname, email, company);
-					
-					userIds.add(tempUser);
-				}
+				User tempUser = new User(firstname, lastname, email, company);
+				
+				userIds.add(tempUser);
 			}
+			
 		} catch (Exception e) {
-			// TODO: handle exception
+			directionUtil.databaseErrorDirect(response);
 		} finally {
-			close(connection, statementSelectUserId, resultSetUserId);
-			close(null, statementSelectUser, resultSetUser);
+			close(connection, statement, resultSet, response);
 		}
 		return userIds;
 	}

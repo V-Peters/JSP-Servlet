@@ -2,16 +2,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Liste der Veranstaltungen</title>
-<!-- 
-	<link type="text/css" rel="stylesheet" href="css/style.css" />
-	-->
+	<title>Liste der Veranstaltungen</title>
 </head>
 
 <body>
 
 	<h2>Veranstaltungen</h2>
-	
 
 	<input type="button" value="zurück zur Übersicht" onclick="window.location.href='MeetingControllerServlet'; return false;" />
 	
@@ -42,7 +38,7 @@
 		<c:if test="${ISEMPTY}" >
 			<tr>
 				<td>
-					Zu dieser Veranstaltung haben sich noch keine User angebemdet.
+					Zu dieser Veranstaltung haben sich noch keine User angemeldet.
 				</td>
 			</tr>
 		</c:if>
@@ -66,8 +62,8 @@
 								<c:set var="counter" value="${counter+1}" />
 							</tr>
 						</c:forEach>
-						<input type="hidden" name="end" value="${counter}" />
 					</table>
+					<input type="hidden" name="end" value="${counter}" />
 				</td>
 			</tr>
 		</c:if>

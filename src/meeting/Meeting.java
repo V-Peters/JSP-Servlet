@@ -9,19 +9,15 @@ public class Meeting {
 	private boolean display;
 	
 	public Meeting(int id, String name, String date, String time, boolean display) {
+		this(name, date, time, display);
 		this.id = id;
+	}
+	
+	public Meeting(String name, String date, String time, boolean display) {
 		this.name = name;
 		this.date = date;
 		this.time = time;
 		this.display = display;
-	}
-	
-	public Meeting(String name, String datum, String uhrzeit, boolean anzeigen) {
-		this.name = name;
-		this.setDate(datum);
-		this.setTime(uhrzeit);
-		this.display = anzeigen;
-
 	}
 	
 	public int getId() {

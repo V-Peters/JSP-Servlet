@@ -1,6 +1,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>Liste der Veranstaltungen</title>
 </head>
@@ -16,11 +17,10 @@
 	private static final String USERFIRSTNAMECOOKIE = "JSP.userFirstname";
 	private static final String USERLASTNAMECOOKIE = "JSP.userLastname";
 	private static final String USERISADMINCOOKIE = "JSP.userIsAdmin";
-	private String userId = "0";
-	private String firstname = "Nie";
-	private String lastname = "mand";
+	private String userId;
+	private String firstname;
+	private String lastname;
 	private boolean isAdmin;
-//	private String userName = firstname + lastname;;
 	%>
 	<%
 		Cookie[] cookies = request.getCookies();
@@ -71,19 +71,16 @@
 				<c:set var="counter" value="${1}" />
 				<c:forEach var="tempMeeting" items="${MEETING_LIST}">
 
-					<!-- create an own link for each meeting -->
 					<c:url var="updateLink" value="MeetingControllerServlet">
 						<c:param name="command" value="LOADMEETING" />
 						<c:param name="meetingId" value="${tempMeeting.id}" />
 					</c:url>
 
-					<!-- create an own link for each meeting -->
 					<c:url var="deleteLink" value="MeetingControllerServlet">
 						<c:param name="command" value="DELETEMEETING" />
 						<c:param name="meetingId" value="${tempMeeting.id}" />
 					</c:url>
 
-					<!-- create an own link for each meeting -->
 					<c:url var="participantsLink" value="MeetingControllerServlet">
 						<c:param name="command" value="LISTPARTICIPANTS" />
 						<c:param name="meetingId" value="${tempMeeting.id}" />
@@ -114,8 +111,8 @@
 						</td>
 					</tr>
 				</c:forEach>
-				<input type="hidden" name="end" value="${counter}" />
 			</table>
+			<input type="hidden" name="end" value="${counter}" />
 			<input type="submit" value="Änderungen speichern" name="Save" class="save" />
 		</form>
 	</c:if>
@@ -136,19 +133,17 @@
 				</tr>
 				<c:set var="counter" value="${1}" />
 				<c:forEach var="tempMeeting" items="${MEETING_LIST}">
-				<c:if test="${tempMeeting.isDisplay()}">
+					<c:if test="${tempMeeting.isDisplay()}">
 						<tr>
 							<td align="right">${counter}</td>
 							<td>${tempMeeting.getName()}</td>
 							<td>${tempMeeting.getDate().substring(8)}.${tempMeeting.getDate().substring(5, 7)}.${tempMeeting.getDate().substring(0, 4)}</td>
 							<td>${tempMeeting.getTime().substring(0, 5)} Uhr</td>
 							<td align="center">
-							<c:set var="signedUp" value="false" />
+								<c:set var="signedUp" value="false" />
 								<c:forEach var="tempMeetingId" items="${MEETINGS_SIGNED_UP}">
 									<c:if test="${tempMeetingId == tempMeeting.getId()}">
 										<c:set var="signedUp" value="true" />
-									</c:if>
-									<c:if test="${tempMeetingId != tempMeeting.getId()}">
 									</c:if>
 								</c:forEach>
 								<c:if test="${signedUp == true}" >
@@ -163,8 +158,8 @@
 						</tr>
 					</c:if>
 				</c:forEach>
-				<input type="hidden" name="end" value="${counter}" />
 			</table>
+			<input type="hidden" name="end" value="${counter}" />
 			<input type="submit" value="Zu Veranstaltungen ein-/austragen" name="Save" class="save" />
 		</form>
 	</c:if>
