@@ -20,6 +20,14 @@ public class Meeting {
 		this.display = display;
 	}
 	
+	public Meeting(int id, Meeting meeting) {
+		this.id = id;
+		this.name = meeting.getName();
+		this.date = meeting.getDate();
+		this.time = meeting.getTime();
+		this.display = meeting.isDisplay();
+	}
+
 	public int getId() {
 		return id;
 	}
