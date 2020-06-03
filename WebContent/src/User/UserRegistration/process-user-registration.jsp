@@ -9,7 +9,7 @@
 	
 	<c:if test="${param.password == param.passwordCheck}">
 		<form action="../../../UserControllerServlet" method=GET>
-			<input type="hidden" name="command" value="ADDUSER" />
+			<input type="hidden" name="command" value="REGISTER_USER" />
 			Der Benutzer hat sich mit folgenden Daten registriert:
 			<table>
 				<tbody>
