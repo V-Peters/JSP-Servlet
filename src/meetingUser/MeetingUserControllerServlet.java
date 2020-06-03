@@ -7,8 +7,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-
-import direction.DirectionUtil;
+import navigation.NavigationUtil;
+import navigation.ValidPath;
 
 /**
  * Servlet implementation class MeetingUserControllerServlet
@@ -19,7 +19,8 @@ public class MeetingUserControllerServlet extends HttpServlet {
 	private static final String SIGNUPUSERFORMEETING = "SIGNUPUSERFORMEETING";
 
 	private MeetingUserDbUtil meetingUserDbUtil;
-	private DirectionUtil directionUtil;
+	
+	private MeetingUserServiceClass meetingUserServiceClass;
 	
 	@Resource(name="jdbc/jsp_test")
 	private DataSource dataSource;
@@ -32,7 +33,7 @@ public class MeetingUserControllerServlet extends HttpServlet {
 			super.init();
 		
 			meetingUserDbUtil = new MeetingUserDbUtil(dataSource);
-			directionUtil = new DirectionUtil();
+			meetingUserServiceClass = new MeetingUserServiceClass(meetingUserDbUtil);
 		} catch (Exception e) {
 			e.printStackTrace();;
 		}
@@ -41,6 +42,7 @@ public class MeetingUserControllerServlet extends HttpServlet {
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			String command = request.getParameter("command");
@@ -60,37 +62,21 @@ public class MeetingUserControllerServlet extends HttpServlet {
 				command = SIGNUPUSERFORMEETING;
 			}
 			
-			
 			switch (command) {
 				case SIGNUPUSERFORMEETING:
-					signUpUserForMeeting(request, response, userId);
+					meetingUserServiceClass.signUpUserForMeeting(request, response, userId);
 					break;
 	
 				default:
-					signUpUserForMeeting(request, response, userId);
+					meetingUserServiceClass.signUpUserForMeeting(request, response, userId);
 					break;
 			}
 			
 		} catch (Exception e) {
-			directionUtil.parameterErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_PARAMETER);
 			e.printStackTrace();
 		}
 		
 	}
 
-	private void signUpUserForMeeting(HttpServletRequest request, HttpServletResponse response, String userId) {
-
-		int counter = 1;
-		int value = 0;
-		while (!request.getParameter("end").equals(counter + "")) {
-			value = 0;
-			if (request.getParameter("signup" + counter) != null) {
-				value = 1;
-			}
-			meetingUserDbUtil.signUpUserForMeeting(value, userId, request.getParameter("signup" + counter + "hidden"), response);
-			counter++;
-		}
-		directionUtil.direct(response, "MeetingControllerServlet");
-	}
-	
 }

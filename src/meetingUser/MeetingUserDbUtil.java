@@ -8,18 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-import direction.DirectionUtil;
 import meeting.Meeting;
+import navigation.NavigationUtil;
+import navigation.ValidPath;
 import user.User;
 
 public class MeetingUserDbUtil {
 	
 	private DataSource dataSource;
-	private DirectionUtil directionUtil;
 	
 	public MeetingUserDbUtil(DataSource dataSource) {
 		this.dataSource = dataSource;
-		directionUtil = new DirectionUtil();
 	}
 	
 	public List<Meeting> getMeetings(HttpServletResponse response) {
@@ -52,20 +51,20 @@ public class MeetingUserDbUtil {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		} finally {
 			close(connection, statement, resultSet, response);
 		}
 		return meetings;
 	}
 
-	private void close(Connection connection, Statement statemet, ResultSet resultSet, HttpServletResponse response) {
+	private void close(Connection connection, Statement statement, ResultSet resultSet, HttpServletResponse response) {
 		try {
 			if (resultSet != null) {
 				resultSet.close();
 			}
-			if (statemet != null) {
-				statemet.close();
+			if (statement != null) {
+				statement.close();
 			}
 			if (connection != null) {
 				connection.close();
@@ -73,7 +72,7 @@ public class MeetingUserDbUtil {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.closeErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_CLOSE);
 		}
 	}
 
@@ -123,7 +122,7 @@ public class MeetingUserDbUtil {
 				}
 			}
 		} catch (Exception e) {
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		} finally {
 			close(connection, statementSelect, resultSet, response);
 			close(null, statementDelete, null, response);
@@ -155,7 +154,7 @@ public class MeetingUserDbUtil {
 				meetingIds.add(resultSet.getString("id_meeting"));
 			}
 		} catch (Exception e) {
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		} finally {
 			close(connection, statement, resultSet, response);
 		}
@@ -194,7 +193,7 @@ public class MeetingUserDbUtil {
 			}
 			
 		} catch (Exception e) {
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		} finally {
 			close(connection, statement, resultSet, response);
 		}

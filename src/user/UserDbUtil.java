@@ -4,29 +4,26 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
-
-import direction.DirectionUtil;
+import navigation.NavigationUtil;
+import navigation.ValidPath;
 
 public class UserDbUtil {
 
 	private DataSource dataSource;
-	private DirectionUtil directionUtil;
 	
 	public UserDbUtil(DataSource dataSource) {
 		this.dataSource = dataSource;
-		directionUtil = new DirectionUtil();
 	}
 	
-	private void close(Connection connection, Statement statemet, ResultSet resultSet, HttpServletResponse response) {
+	private void close(Connection connection, Statement statement, ResultSet resultSet, HttpServletResponse response) {
 		try {
 			if (resultSet != null) {
 				resultSet.close();
 			}
-			if (statemet != null) {
-				statemet.close();
+			if (statement != null) {
+				statement.close();
 			}
 			if (connection != null) {
 				connection.close();
@@ -34,7 +31,7 @@ public class UserDbUtil {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.closeErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_CLOSE);
 		}
 	}
 
@@ -70,12 +67,12 @@ public class UserDbUtil {
 
 				User tempUser = getUser(user.getUsername(), response);
 
-				this.createCookies(response, tempUser, 60 * 30);
+				UserServiceClass.createCookies(response, tempUser, 60 * 30);
 				return true;
 			}			
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		}
 		finally {
 			close(connection, statementSelect, resultSet, response);
@@ -100,16 +97,14 @@ public class UserDbUtil {
 
 			resultSet = statement.executeQuery();
 			
-			if (resultSet.next()) {
-				if (resultSet.getString("password").equals(user.getPassword())) {
-					User tempUser = this.getUser(user.getUsername(), response);
-					this.createCookies(response, tempUser, 60 * 30);
-					return true;
-				}
+			if (resultSet.next() && resultSet.getString("password").equals(user.getPassword())) {
+				User tempUser = this.getUser(user.getUsername(), response);
+				UserServiceClass.createCookies(response, tempUser, 30 * 60);
+				return true;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		}
 		finally {
 			close(connection, statement, resultSet, response);
@@ -117,26 +112,7 @@ public class UserDbUtil {
 		return false;
 	}
 
-	public void createCookies(HttpServletResponse response, User user, int timer) {
-
-		Cookie userIdCookie = new Cookie("JSP.userId", user.getId() + "");
-		Cookie userFirstnameCookie = new Cookie("JSP.userFirstname", user.getFirstname());
-		Cookie userLastnameCookie = new Cookie("JSP.userLastname", user.getLastname());
-		Cookie userIsAdminCookie = new Cookie("JSP.userIsAdmin", user.getIsAdmin());
-
-		userIdCookie.setMaxAge(timer);
-		userFirstnameCookie.setMaxAge(timer);
-		userLastnameCookie.setMaxAge(timer);
-		userIsAdminCookie.setMaxAge(timer);
-
-		response.addCookie(userIdCookie);
-		response.addCookie(userFirstnameCookie);
-		response.addCookie(userLastnameCookie);
-		response.addCookie(userIsAdminCookie);
-		
-	}
-	
-	private User getUser(String username, HttpServletResponse response) {
+	public User getUser(String username, HttpServletResponse response) {
 
 		Connection connection = null;
 		PreparedStatement statement = null;
@@ -145,8 +121,8 @@ public class UserDbUtil {
 		try {
 			connection = dataSource.getConnection();
 			
-			String sqlSelect2 = "SELECT `id`, `firstname`, `lastname`, `is_admin` FROM `jsp_test`.`user` WHERE username = ?;";
-			statement = connection.prepareStatement(sqlSelect2);
+			String sqlSelect = "SELECT `id`, `firstname`, `lastname`, `is_admin` FROM `jsp_test`.`user` WHERE username = ?;";
+			statement = connection.prepareStatement(sqlSelect);
 		
 			statement.setString(1, username);
 	
@@ -158,15 +134,14 @@ public class UserDbUtil {
 				String lastname = resultSet.getString("lastname");
 				String isAdmin = resultSet.getString("is_admin");
 		
-				User tempUser = new User(id, firstname, lastname, isAdmin);
-
-				return tempUser;
+				return new User(id, firstname, lastname, isAdmin);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
+		} finally {
+			close(connection, statement, resultSet, response);
 		}
-		System.out.println("null wird zurück gegeben.");
 		return null;
 		
 	}

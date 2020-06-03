@@ -10,16 +10,15 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 
-import direction.DirectionUtil;
+import navigation.NavigationUtil;
+import navigation.ValidPath;
 
 public class MeetingDbUtil {
 	
 	private DataSource dataSource;
-	private DirectionUtil directionUtil;
 	
 	public MeetingDbUtil(DataSource dataSource) {
 		this.dataSource = dataSource;
-		directionUtil = new DirectionUtil();
 	}
 	
 	public List<Meeting> getMeetings(HttpServletResponse response) {
@@ -52,20 +51,20 @@ public class MeetingDbUtil {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		} finally {
 			close(connection, statement, resultSet, response);
 		}
 		return meetings;
 	}
 
-	private void close(Connection connection, Statement statemet, ResultSet resultSet, HttpServletResponse response) {
+	private void close(Connection connection, Statement statement, ResultSet resultSet, HttpServletResponse response) {
 		try {
 			if (resultSet != null) {
 				resultSet.close();
 			}
-			if (statemet != null) {
-				statemet.close();
+			if (statement != null) {
+				statement.close();
 			}
 			if (connection != null) {
 				connection.close();
@@ -73,7 +72,7 @@ public class MeetingDbUtil {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.closeErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_CLOSE);
 		}
 	}
 
@@ -102,7 +101,7 @@ public class MeetingDbUtil {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		} finally {
 			close(connection, statement, null, response);
 		}
@@ -143,7 +142,7 @@ public class MeetingDbUtil {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		} finally {
 			close(connection, statement, resultSet, response);
 		}
@@ -172,37 +171,45 @@ public class MeetingDbUtil {
 			statement.execute();
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		} finally {
 			close(connectoion, statement, null, response);
 		}
 		
 	}
 
-	public void deleteMeeting(String meeting, HttpServletResponse response) {
+	public void deleteMeeting(int meetingId, HttpServletResponse response) {
 		
 		Connection connection = null;
-		PreparedStatement statement = null;
+		PreparedStatement statementDeleteMeeting = null;
+		PreparedStatement statementDeleteMeetingUser = null;
 		
 		try {
 			
-			int meetingsId = Integer.parseInt(meeting);
-			
 			connection = dataSource.getConnection();
 			
-			String sql = "DELETE FROM jsp_test.meeting WHERE id = ?";
+			String sqlDeleteMeeting = "DELETE FROM jsp_test.meeting WHERE id = ?;";
 			
-			statement = connection.prepareStatement(sql);
+			statementDeleteMeeting = connection.prepareStatement(sqlDeleteMeeting);
+
+			statementDeleteMeeting.setInt(1, meetingId);
 			
-			statement.setInt(1, meetingsId);
+			statementDeleteMeeting.execute();
 			
-			statement.execute();
+			String sqlDeleteMeetingUser = "DELETE FROM jsp_test.meeting_user WHERE id_meeting = ?;";
+			
+			statementDeleteMeetingUser = connection.prepareStatement(sqlDeleteMeetingUser);
+
+			statementDeleteMeetingUser.setInt(1, meetingId);
+			
+			statementDeleteMeetingUser.execute();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		} finally {
-			close(connection, statement, null, response);
+			close(connection, statementDeleteMeeting, null, response);
+			close(null, statementDeleteMeetingUser, null, response);
 		}
 		
 	}
@@ -245,7 +252,7 @@ public class MeetingDbUtil {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			directionUtil.databaseErrorDirect(response);
+			NavigationUtil.navigate(response, ValidPath.ERROR_DATABASE);
 		} finally {
 			close(connection, statementSelect, resultSet, response);
 			close(null, statementUpdate, null, response);
