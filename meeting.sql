@@ -20,6 +20,6 @@ VALUES
 	('Ernährungsberatung', '2020-06-01 12:00:00'),
 	('Workshop Datenverwaltung', '2020-06-01 14:00:00'),
 	('Vortrag Algorithmen', '2020-06-20 10:30:00'),
-	('Vartrag Datenstrukturen', '2020-06-20 12:30:00'),
+	('Vortrag Datenstrukturen', '2020-06-20 12:30:00'),
 	('SQL Einführung', '2020-06-06 08:30:00'),
 	('Einführung in komplexe Systeme', '2020-06-06 15:00:00');
